@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mobile Card Game Engine</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      touch-action: none; /* Prevent scroll on mobile */
+    }
+    body, html {
+      height: 100%;
+      overflow: hidden;
+      background-color: #2e2e2e;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #game-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+    .card {
+      width: 80px;
+      height: 120px;
+      background-color: #ffffff;
+      border-radius: 10px;
+      border: 2px solid #000;
+      position: absolute;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.2s;
+    }
+    .card.flipped {
+      background-color: #1e1e1e;
+      color: white;
+    }
+    .controls {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      z-index: 100;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container"></div>
+  <div class="controls">
+    <button onclick="reshuffle()">Reshuffle</button>
+    <button onclick="reset()">Reset</button>
+  </div>
+  <script>
+    const gameContainer = document.getElementById("game-container");
+    const cards = [];
+    const suits = ['♠', '♥', '♦', '♣'];
+    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+
+    function createDeck() {
+      const deck = [];
+      for (let suit of suits) {
+        for (let value of values) {
+          deck.push(`${value}${suit}`);
+        }
+      }
+      return deck;
+    }
+
+    function shuffle(deck) {
+      for (let i = deck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [deck[i], deck[j]] = [deck[j], deck[i]];
+      }
+    }
+
+    function createCards(deck) {
+      gameContainer.innerHTML = "";
+      cards.length = 0;
+      deck.forEach((text, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.textContent = text;
+        card.style.left = `${Math.random() * (window.innerWidth - 80)}px`;
+        card.style.top = `${Math.random() * (window.innerHeight - 120)}px`;
+
+        let offsetX, offsetY;
+        let isDragging = false;
+
+        card.addEventListener("pointerdown", (e) => {
+          offsetX = e.clientX - card.offsetLeft;
+          offsetY = e.clientY - card.offsetTop;
+          isDragging = true;
+          card.setPointerCapture(e.pointerId);
+        });
+
+        card.addEventListener("pointermove", (e) => {
+          if (!isDragging) return;
+          card.style.left = `${e.clientX - offsetX}px`;
+          card.style.top = `${e.clientY - offsetY}px`;
+        });
+
+        card.addEventListener("pointerup", (e) => {
+          isDragging = false;
+          card.releasePointerCapture(e.pointerId);
+        });
+
+        card.addEventListener("dblclick", () => {
+          card.classList.toggle("flipped");
+        });
+
+        cards.push(card);
+        gameContainer.appendChild(card);
+      });
+    }
+
+    function reshuffle() {
+      const deck = createDeck();
+      shuffle(deck);
+      cards.forEach((card, i) => {
+        card.textContent = deck[i];
+        card.classList.remove("flipped");
+        card.style.left = `${Math.random() * (window.innerWidth - 80)}px`;
+        card.style.top = `${Math.random() * (window.innerHeight - 120)}px`;
+      });
+    }
+
+    function reset() {
+      const deck = createDeck();
+      shuffle(deck);
+      createCards(deck);
+    }
+
+    reset();
+  </script>
+</body>
+</html>
