@@ -24,7 +24,7 @@
       height: 100vh;
       overflow: hidden;
     }
-    .card {
+    .card, .chip {
       width: 18vw;
       max-width: 80px;
       aspect-ratio: 2/3;
@@ -78,6 +78,16 @@
     label input[type="checkbox"] {
       margin-right: 4px;
     }
+    .tooltip {
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      z-index: 999;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -100,11 +110,31 @@
     const gameContainer = document.getElementById("game-container");
     const cards = [];
     let flipMode = false;
+    let tooltip;
 
     const baseSuits = ['♠', '♥', '♦', '♣'];
     const extraSuits = ['★', '✿'];
     const baseValues = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
     const extraValues = ['X', 'Y', 'Z', 'U', 'V', 'W', 'T'];
+
+    const fullNames = {
+      A: 'Ace', J: 'Jack', Q: 'Queen', K: 'King',
+      X: 'Xeno', Y: 'Yeti', Z: 'Zealot', U: 'Unicorn', V: 'Valkyrie', W: 'Warden', T: 'Titan'
+    };
+
+    const valueInfo = {
+      A: v => `Ace\nValue: ${v === 'extraRanks' ? '1 or 21' : '1 or 14'}`,
+      J: () => 'Jack\nValue: 11',
+      Q: () => 'Queen\nValue: 12',
+      K: () => 'King\nValue: 13',
+      X: () => 'Xeno\nValue: 14',
+      Y: () => 'Yeti\nValue: 15',
+      Z: () => 'Zealot\nValue: 16',
+      U: () => 'Unicorn\nValue: 17',
+      V: () => 'Valkyrie\nValue: 18',
+      W: () => 'Warden\nValue: 19',
+      T: () => 'Titan\nValue: 20'
+    };
 
     function toggleFlipMode() {
       flipMode = !flipMode;
@@ -126,13 +156,13 @@
       let deck = [];
       for (let suit of suits) {
         for (let value of values) {
-          deck.push({ label: `${value}${suit}`, suit });
+          deck.push({ label: `${value}${suit}`, suit, value });
         }
       }
 
       if (jokers) {
-        deck.push({ label: 'JOKER', suit: 'joker' });
-        deck.push({ label: 'JOKER', suit: 'joker' });
+        deck.push({ label: 'JOKER', suit: 'joker', value: 'JOKER' });
+        deck.push({ label: 'JOKER', suit: 'joker', value: 'JOKER' });
       }
 
       if (allowDuplicates) {
@@ -149,86 +179,112 @@
       }
     }
 
-    function getCenterPosition(card) {
-      const rect = card.getBoundingClientRect();
+    function getCenterPosition(el) {
+      const rect = el.getBoundingClientRect();
       const centerX = window.innerWidth / 2 - rect.width / 2;
       const centerY = window.innerHeight / 2 - rect.height / 2;
       return { centerX, centerY };
+    }
+
+    function showTooltip(text, x, y) {
+      if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        document.body.appendChild(tooltip);
+      }
+      tooltip.textContent = text;
+      tooltip.style.left = `${x + 15}px`;
+      tooltip.style.top = `${y + 15}px`;
+      tooltip.style.display = 'block';
+    }
+
+    function hideTooltip() {
+      if (tooltip) tooltip.style.display = 'none';
     }
 
     function createCards(deck) {
       gameContainer.innerHTML = "";
       cards.length = 0;
 
+      const showChips = document.getElementById("chips").checked;
+      if (showChips) {
+        for (let i = 0; i < 5; i++) {
+          const chip = document.createElement("div");
+          chip.className = "chip";
+          chip.textContent = `$${(i + 1) * 10}`;
+          chip.style.left = `${20 + i * 60}px`;
+          chip.style.top = `20px`;
+          gameContainer.appendChild(chip);
+          makeDraggable(chip);
+        }
+      }
+
       deck.forEach((data, index) => {
         const card = document.createElement("div");
         card.className = "card";
         card.textContent = data.label;
         card.dataset.suit = data.suit;
+        card.dataset.value = data.value;
         card.style.zIndex = index;
         card.style.visibility = "hidden";
         gameContainer.appendChild(card);
         cards.push(card);
+        makeDraggable(card, data);
       });
 
       requestAnimationFrame(() => {
-        cards.forEach((card, index) => {
+        cards.forEach((card) => {
           const { centerX, centerY } = getCenterPosition(card);
           card.style.left = `${centerX}px`;
           card.style.top = `${centerY}px`;
           card.style.visibility = "visible";
-
-          let offsetX, offsetY;
-          let isDragging = false;
-
-          card.addEventListener("pointerdown", (e) => {
-            offsetX = e.clientX - card.offsetLeft;
-            offsetY = e.clientY - card.offsetTop;
-            isDragging = true;
-            card.setPointerCapture(e.pointerId);
-          });
-
-          card.addEventListener("pointermove", (e) => {
-            if (!isDragging) return;
-            card.style.left = `${e.clientX - offsetX}px`;
-            card.style.top = `${e.clientY - offsetY}px`;
-          });
-
-          card.addEventListener("pointerup", (e) => {
-            isDragging = false;
-            card.releasePointerCapture(e.pointerId);
-          });
-
-          card.addEventListener("click", () => {
-            if (!flipMode) return;
-            card.classList.toggle("flipped");
-            if (card.classList.contains("flipped")) {
-              if (card.dataset.suit === '♥' || card.dataset.suit === '♦') {
-                card.classList.add("red");
-              }
-            } else {
-              card.classList.remove("red");
-            }
-          });
         });
+      });
+    }
+
+    function makeDraggable(el, data = null) {
+      let offsetX, offsetY, isDragging = false;
+
+      el.addEventListener("pointerdown", (e) => {
+        offsetX = e.clientX - el.offsetLeft;
+        offsetY = e.clientY - el.offsetTop;
+        isDragging = true;
+        el.setPointerCapture(e.pointerId);
+        if (el.classList.contains("flipped") && data) {
+          const mode = document.getElementById("deck-mode").value;
+          const info = valueInfo[data.value]?.(mode) || fullNames[data.value] || data.label;
+          showTooltip(info, e.clientX, e.clientY);
+        }
+      });
+
+      el.addEventListener("pointermove", (e) => {
+        if (!isDragging) return;
+        el.style.left = `${e.clientX - offsetX}px`;
+        el.style.top = `${e.clientY - offsetY}px`;
+        if (tooltip) showTooltip(tooltip.textContent, e.clientX, e.clientY);
+      });
+
+      el.addEventListener("pointerup", (e) => {
+        isDragging = false;
+        el.releasePointerCapture(e.pointerId);
+        hideTooltip();
+      });
+
+      el.addEventListener("click", () => {
+        if (!flipMode || el.classList.contains("chip")) return;
+        el.classList.toggle("flipped");
+        if (el.classList.contains("flipped") && (el.dataset.suit === '♥' || el.dataset.suit === '♦')) {
+          el.classList.add("red");
+        } else {
+          el.classList.remove("red");
+        }
       });
     }
 
     function reshuffle() {
       const deck = createDeck();
       shuffle(deck);
-
-      cards.forEach((card, i) => {
-        const data = deck[i];
-        card.textContent = data.label;
-        card.dataset.suit = data.suit;
-        const { centerX, centerY } = getCenterPosition(card);
-        card.style.left = `${centerX}px`;
-        card.style.top = `${centerY}px`;
-        card.style.zIndex = i;
-        card.classList.remove("flipped", "red");
-        card.style.color = "transparent";
-      });
+      createCards(deck);
     }
 
     function reset() {
