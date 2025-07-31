@@ -55,26 +55,43 @@
       left: 50%;
       transform: translateX(-50%);
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
       z-index: 100;
+      justify-content: center;
     }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
+    .controls > * {
+      margin: 2px;
+    }
+    button, select, label {
+      padding: 10px;
+      font-size: 14px;
       border: none;
       border-radius: 6px;
       background-color: #444;
       color: white;
       cursor: pointer;
     }
-    button:hover {
+    button:hover, select:hover {
       background-color: #666;
+    }
+    label input[type="checkbox"] {
+      margin-right: 4px;
     }
   </style>
 </head>
 <body>
   <div id="game-container"></div>
   <div class="controls">
+    <select id="deck-mode">
+      <option value="normal">Normal Deck</option>
+      <option value="5suits">+1 Extra Suit</option>
+      <option value="6suits">+2 Extra Suits</option>
+      <option value="extraRanks">+7 Extra Ranks</option>
+    </select>
+    <label><input type="checkbox" id="jokers">Jokers</label>
+    <label><input type="checkbox" id="chips">Poker Chips</label>
+    <label><input type="checkbox" id="duplicates">Unrestricted Shuffle</label>
     <button onclick="reshuffle()">Reshuffle</button>
     <button onclick="reset()">Reset</button>
     <button onclick="toggleFlipMode()" id="flip-toggle">Flip: Off</button>
@@ -82,9 +99,12 @@
   <script>
     const gameContainer = document.getElementById("game-container");
     const cards = [];
-    const suits = ['♠', '♥', '♦', '♣'];
-    const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
     let flipMode = false;
+
+    const baseSuits = ['♠', '♥', '♦', '♣'];
+    const extraSuits = ['★', '✿'];
+    const baseValues = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    const extraValues = ['X', 'Y', 'Z', 'U', 'V', 'W', 'T'];
 
     function toggleFlipMode() {
       flipMode = !flipMode;
@@ -92,12 +112,33 @@
     }
 
     function createDeck() {
-      const deck = [];
+      const mode = document.getElementById("deck-mode").value;
+      const jokers = document.getElementById("jokers").checked;
+      const allowDuplicates = document.getElementById("duplicates").checked;
+
+      let suits = [...baseSuits];
+      let values = [...baseValues];
+
+      if (mode === '5suits') suits.push(extraSuits[0]);
+      if (mode === '6suits') suits.push(...extraSuits);
+      if (mode === 'extraRanks') values.push(...extraValues);
+
+      let deck = [];
       for (let suit of suits) {
         for (let value of values) {
           deck.push({ label: `${value}${suit}`, suit });
         }
       }
+
+      if (jokers) {
+        deck.push({ label: 'JOKER', suit: 'joker' });
+        deck.push({ label: 'JOKER', suit: 'joker' });
+      }
+
+      if (allowDuplicates) {
+        deck = [...deck, ...deck];
+      }
+
       return deck;
     }
 
@@ -203,6 +244,11 @@
         card.style.top = `${centerY}px`;
       });
     });
+
+    document.getElementById("deck-mode").addEventListener("change", reset);
+    document.getElementById("jokers").addEventListener("change", reset);
+    document.getElementById("chips").addEventListener("change", reset);
+    document.getElementById("duplicates").addEventListener("change", reset);
 
     reset();
   </script>
