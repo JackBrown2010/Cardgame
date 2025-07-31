@@ -25,8 +25,9 @@
       overflow: hidden;
     }
     .card {
-      width: 80px;
-      height: 120px;
+      width: 18vw;
+      max-width: 80px;
+      aspect-ratio: 2/3;
       background-color: #1e1e1e;
       border-radius: 10px;
       border: 2px solid #000;
@@ -34,7 +35,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-size: 24px;
+      font-size: 4vw;
       font-weight: bold;
       cursor: grab;
       user-select: none;
@@ -76,12 +77,19 @@
   <div class="controls">
     <button onclick="reshuffle()">Reshuffle</button>
     <button onclick="reset()">Reset</button>
+    <button onclick="toggleFlipMode()" id="flip-toggle">Flip: Off</button>
   </div>
   <script>
     const gameContainer = document.getElementById("game-container");
     const cards = [];
     const suits = ['♠', '♥', '♦', '♣'];
     const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+    let flipMode = false;
+
+    function toggleFlipMode() {
+      flipMode = !flipMode;
+      document.getElementById("flip-toggle").textContent = "Flip: " + (flipMode ? "On" : "Off");
+    }
 
     function createDeck() {
       const deck = [];
@@ -100,69 +108,80 @@
       }
     }
 
+    function getCenterPosition(card) {
+      const rect = card.getBoundingClientRect();
+      const centerX = window.innerWidth / 2 - rect.width / 2;
+      const centerY = window.innerHeight / 2 - rect.height / 2;
+      return { centerX, centerY };
+    }
+
     function createCards(deck) {
       gameContainer.innerHTML = "";
       cards.length = 0;
-      const centerX = window.innerWidth / 2 - 40;
-      const centerY = window.innerHeight / 2 - 60;
 
       deck.forEach((data, index) => {
         const card = document.createElement("div");
         card.className = "card";
         card.textContent = data.label;
         card.dataset.suit = data.suit;
-
-        card.style.left = `${centerX}px`;
-        card.style.top = `${centerY}px`;
         card.style.zIndex = index;
-
-        let offsetX, offsetY;
-        let isDragging = false;
-
-        card.addEventListener("pointerdown", (e) => {
-          offsetX = e.clientX - card.offsetLeft;
-          offsetY = e.clientY - card.offsetTop;
-          isDragging = true;
-          card.setPointerCapture(e.pointerId);
-        });
-
-        card.addEventListener("pointermove", (e) => {
-          if (!isDragging) return;
-          card.style.left = `${e.clientX - offsetX}px`;
-          card.style.top = `${e.clientY - offsetY}px`;
-        });
-
-        card.addEventListener("pointerup", (e) => {
-          isDragging = false;
-          card.releasePointerCapture(e.pointerId);
-        });
-
-        card.addEventListener("dblclick", () => {
-          card.classList.toggle("flipped");
-          if (card.classList.contains("flipped")) {
-            if (data.suit === '♥' || data.suit === '♦') {
-              card.classList.add("red");
-            }
-          } else {
-            card.classList.remove("red");
-          }
-        });
-
-        cards.push(card);
+        card.style.visibility = "hidden";
         gameContainer.appendChild(card);
+        cards.push(card);
+      });
+
+      requestAnimationFrame(() => {
+        cards.forEach((card, index) => {
+          const { centerX, centerY } = getCenterPosition(card);
+          card.style.left = `${centerX}px`;
+          card.style.top = `${centerY}px`;
+          card.style.visibility = "visible";
+
+          let offsetX, offsetY;
+          let isDragging = false;
+
+          card.addEventListener("pointerdown", (e) => {
+            offsetX = e.clientX - card.offsetLeft;
+            offsetY = e.clientY - card.offsetTop;
+            isDragging = true;
+            card.setPointerCapture(e.pointerId);
+          });
+
+          card.addEventListener("pointermove", (e) => {
+            if (!isDragging) return;
+            card.style.left = `${e.clientX - offsetX}px`;
+            card.style.top = `${e.clientY - offsetY}px`;
+          });
+
+          card.addEventListener("pointerup", (e) => {
+            isDragging = false;
+            card.releasePointerCapture(e.pointerId);
+          });
+
+          card.addEventListener("click", () => {
+            if (!flipMode) return;
+            card.classList.toggle("flipped");
+            if (card.classList.contains("flipped")) {
+              if (card.dataset.suit === '♥' || card.dataset.suit === '♦') {
+                card.classList.add("red");
+              }
+            } else {
+              card.classList.remove("red");
+            }
+          });
+        });
       });
     }
 
     function reshuffle() {
       const deck = createDeck();
       shuffle(deck);
-      const centerX = window.innerWidth / 2 - 40;
-      const centerY = window.innerHeight / 2 - 60;
 
       cards.forEach((card, i) => {
         const data = deck[i];
         card.textContent = data.label;
         card.dataset.suit = data.suit;
+        const { centerX, centerY } = getCenterPosition(card);
         card.style.left = `${centerX}px`;
         card.style.top = `${centerY}px`;
         card.style.zIndex = i;
@@ -176,6 +195,14 @@
       shuffle(deck);
       createCards(deck);
     }
+
+    window.addEventListener("resize", () => {
+      cards.forEach((card) => {
+        const { centerX, centerY } = getCenterPosition(card);
+        card.style.left = `${centerX}px`;
+        card.style.top = `${centerY}px`;
+      });
+    });
 
     reset();
   </script>
