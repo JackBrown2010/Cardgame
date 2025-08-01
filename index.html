@@ -107,6 +107,12 @@
     <button onclick="toggleFlipMode()" id="flip-toggle">Flip: Off</button>
      <button onclick="scatterCards()">Scatter</button>
     <button onclick="flipAll()">Flip All</button>
+    <select id="template-menu" onchange="loadTemplate(this.value)">
+      <option value="">Game Template</option>
+      <option value="solitaire">Solitaire</option>
+      <option value="poker">Poker</option>
+      <option value="blackjack">Blackjack</option>
+    </select>
   </div>
   <script>
     const gameContainer = document.getElementById("game-container");
@@ -154,6 +160,82 @@
           card.classList.remove("red");
         }
       });
+    }
+
+function createCard(value, suit) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.textContent = value + suit;
+      card.dataset.value = value;
+      card.dataset.suit = suit;
+      card.style.left = `${window.innerWidth / 2}px`;
+      card.style.top = `${window.innerHeight / 2}px`;
+      document.getElementById('game-container').appendChild(card);
+      cards.push(card);
+      return card;
+    }
+
+     function loadTemplate(template) {
+      if (!template) return;
+      reset();
+      const suits = ['♠', '♥', '♦', '♣'];
+      const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+      const fullDeck = [];
+
+      for (const suit of suits) {
+        for (const rank of ranks) {
+          fullDeck.push({ value: rank, suit });
+        }
+      }
+
+      fullDeck.sort(() => Math.random() - 0.5);
+
+      switch (template) {
+        case "solitaire":
+          for (let i = 0; i < 7; i++) {
+            for (let j = 0; j <= i; j++) {
+              const cardData = fullDeck.pop();
+              const card = createCard(cardData.value, cardData.suit);
+              card.style.left = `${100 + i * 100}px`;
+              card.style.top = `${50 + j * 30}px`;
+              if (j === i) card.classList.add('flipped');
+            }
+          }
+          break;
+        case "poker":
+          for (let hand = 0; hand < 4; hand++) {
+            for (let i = 0; i < 5; i++) {
+              const cardData = fullDeck.pop();
+              const card = createCard(cardData.value, cardData.suit);
+              card.classList.add('flipped');
+              card.style.left = `${50 + i * 100}px`;
+              card.style.top = `${50 + hand * 150}px`;
+            }
+          }
+          break;
+        case "blackjack":
+          for (let player = 0; player < 2; player++) {
+            for (let i = 0; i < 2; i++) {
+              const cardData = fullDeck.pop();
+              const card = createCard(cardData.value, cardData.suit);
+              card.classList.add('flipped');
+              card.style.left = `${200 + i * 100}px`;
+              card.style.top = `${100 + player * 200}px`;
+            }
+          }
+          break;
+        case "thirteen":
+          for (let pile = 0; pile < 13; pile++) {
+            for (let i = 0; i < 4; i++) {
+              const cardData = fullDeck.pop();
+              const card = createCard(cardData.value, cardData.suit);
+              card.style.left = `${50 + pile * 60}px`;
+              card.style.top = `${100 + i * 20}px`;
+              if (pile === 12) card.classList.add('flipped');
+            }
+          }
+          break;
+      }
     }
     
     function toggleFlipMode() {
