@@ -23,6 +23,7 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
+      transform-origin: top left;
     }
     .card, .chip {
       width: 18vw;
@@ -116,6 +117,7 @@
   <div id="game-container"></div>
   <button id="hide-ui-toggle" onclick="toggleUI()">Hide UI</button>
   <input id="zoom-control" type="range" min="0.5" max="2" step="0.1" value="1" oninput="zoomGame(this.value)" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <div class="controls">
     <select id="deck-mode">
       <option value="normal">Normal Deck</option>
@@ -197,20 +199,26 @@
     }
 
 function zoomGame(scale) {
-      document.documentElement.style.setProperty('--zoom', scale);
-    }
+  document.documentElement.style.setProperty('--zoom', scale);
+  const container = document.getElementById('game-container');
+  container.style.transform = `scale(${scale})`;
+}
+
+    window.onload = () => {
+  zoomGame(document.getElementById('zoom-control').value);
+};
+
 
     function toggleUI() {
       const ui = document.getElementById('ui-controls');
+      const zoom = document.getElementById('zoom-control');
       const btn = document.getElementById('hide-ui-toggle');
-      if (ui.style.display === 'none') {
-        ui.style.display = 'flex';
-        btn.textContent = 'Hide UI';
-      } else {
-        ui.style.display = 'none';
-        btn.textContent = 'Show UI';
-      }
+      const isHidden = ui.style.display === 'none';
+      ui.style.display = isHidden ? 'flex' : 'none';
+      zoom.style.display = isHidden ? 'block' : 'none';
+      btn.textContent = isHidden ? 'Hide UI' : 'Show UI';
     }
+
     
 function createCard(value, suit) {
       const card = document.createElement('div');
