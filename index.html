@@ -201,13 +201,19 @@ function zoomGame(scale) {
   document.documentElement.style.setProperty('--zoom', scale);
 }
 
-    window.onload = () => {
+  window.onload = () => {
   zoomGame(document.getElementById('zoom-control').value);
-      const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom')) || 1;
-card.style.left = (x * zoom) + "px";
-card.style.top = (y * zoom) + "px";
 
+  const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom')) || 1;
+
+  cards.forEach(card => {
+    const x = parseFloat(card.style.left) || 0;
+    const y = parseFloat(card.style.top) || 0;
+    card.style.left = (x * zoom) + "px";
+    card.style.top = (y * zoom) + "px";
+  });
 };
+
 
 
     function toggleUI() {
