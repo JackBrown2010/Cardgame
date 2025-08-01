@@ -175,6 +175,32 @@ function createCard(value, suit) {
       return card;
     }
 
+     function scatterThenLoadTemplate(template) {
+      if (!template) return;
+      reset();
+
+      const suits = ['♠', '♥', '♦', '♣'];
+      const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+      const fullDeck = [];
+
+      for (const suit of suits) {
+        for (const rank of ranks) {
+          fullDeck.push({ value: rank, suit });
+        }
+      }
+
+      fullDeck.sort(() => Math.random() - 0.5);
+
+      fullDeck.forEach(data => {
+        const card = createCard(data.value, data.suit);
+        card.style.left = `${Math.random() * (window.innerWidth - 80)}px`;
+        card.style.top = `${Math.random() * (window.innerHeight - 120)}px`;
+      });
+
+      setTimeout(() => loadTemplate(template), 600);
+    }
+
+
      function loadTemplate(template) {
       if (!template) return;
       reset();
