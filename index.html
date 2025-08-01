@@ -92,6 +92,8 @@
 </head>
 <body>
   <div id="game-container"></div>
+  <button id="hide-ui-toggle" onclick="toggleUI()">Hide UI</button>
+  <input id="zoom-control" type="range" min="0.5" max="2" step="0.1" value="1" oninput="zoomGame(this.value)" />
   <div class="controls">
     <select id="deck-mode">
       <option value="normal">Normal Deck</option>
