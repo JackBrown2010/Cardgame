@@ -88,6 +88,28 @@
       z-index: 999;
       pointer-events: none;
     }
+    #zoom-control {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 200; /* <-- Make sure it's above game-container */
+  background: rgba(0,0,0,0.5);
+  padding: 5px;
+  border-radius: 6px;
+}
+
+#hide-ui-toggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 200; /* <-- Same here */
+  background: #444;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
   </style>
 </head>
 <body>
@@ -123,7 +145,7 @@
     const cards = [];
     let flipMode = false;
     let tooltip;
- const chaoticSuits = ['★', '☘', '☂', '☠', '★', '✿'];
+ const chaoticSuits = ['★', '☘', '☂', '☠', '★', '✿', '❦'];
     const chaoticRanks = ['0', '-1', 'Pi', 'Inf', 'Omega', 'Nan', '1000', 'Z1', 'X1', 'Y1'];
     const baseSuits = ['♠', '♥', '♦', '♣'];
     const extraSuits = ['★', '✿'];
