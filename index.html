@@ -148,7 +148,7 @@
     const cards = [];
     let flipMode = false;
     let tooltip;
- const chaoticSuits = ['★', '☘', '☂', '☠', '★', '✿', '❦'];
+ const chaoticSuits = ['★', '☘', '〠', '☠', '✿', '❦'];
     const chaoticRanks = ['0', '-1', 'Pi', 'Inf', 'Omega', 'Nan', '1000', 'Z1', 'X1', 'Y1'];
     const baseSuits = ['♠', '♥', '♦', '♣'];
     const extraSuits = ['★', '✿'];
@@ -191,7 +191,7 @@
     function flipAll() {
       cards.forEach(card => {
         card.classList.add("flipped");
-        if (card.dataset.suit === '♥' || card.dataset.suit === '♦') {
+        if (card.dataset.suit === '♥' || card.dataset.suit === '♦' || card.dataset.suit === '☘' || card.dataset.suit === '〠' || card.dataset.suit === '❦') {
           card.classList.add("red");
         } else {
           card.classList.remove("red");
@@ -318,37 +318,6 @@ function createCard(value, suit) {
           }
           break;
         }
-
-        case "spiral": {
- const container = document.getElementById("game-container");
-      container.innerHTML = "";
-      const deck = generateDeck("chaos").slice(0, 104);
-      let centerX = 400;
-      let centerY = 300;
-      let totalCards = 0;
-
-      for (let ring = 1; ring <= 3; ring++) {
-        const ringCards = 20 + ring * 10;
-        const radius = 80 + ring * 50;
-        for (let i = 0; i < ringCards; i++) {
-          if (totalCards >= deck.length) return;
-          const angle = (Math.PI * 2 * i) / ringCards;
-          const x = centerX + Math.cos(angle) * radius;
-          const y = centerY + Math.sin(angle) * radius;
-          const card = deck[totalCards++];
-          const el = document.createElement("div");
-          el.className = "card flipped";
-          el.textContent = card.value + card.suit;
-          el.dataset.value = card.value;
-          el.dataset.suit = card.suit;
-          el.style.left = `${x}px`;
-          el.style.top = `${y}px`;
-          container.appendChild(el);
-          makeDraggable(el, card);
-        }
-      }
-        }
-          
         case "thirteen": {
           let idx = 0;
           for (let pile = 0; pile < 13; pile++) {
