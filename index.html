@@ -98,6 +98,7 @@
       <option value="5suits">+1 Extra Suit</option>
       <option value="6suits">+2 Extra Suits</option>
       <option value="extraRanks">+7 Extra Ranks</option>
+       <option value="chaos">Chaotic Cards</option>
     </select>
     <label><input type="checkbox" id="jokers">Jokers</label>
     <label><input type="checkbox" id="chips">Poker Chips</label>
@@ -120,7 +121,8 @@
     const cards = [];
     let flipMode = false;
     let tooltip;
-
+ const chaoticSuits = ['★', '☘', '☂', '☠', '★', '✿'];
+    const chaoticRanks = ['0', '-1', 'π', '∞', 'Ω', '‡', '1000', 'Z1', '?', 'X1', 'Y1'];
     const baseSuits = ['♠', '♥', '♦', '♣'];
     const extraSuits = ['★', '✿'];
     const baseValues = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -142,7 +144,14 @@
       U: () => 'Unicorn\nValue: 17',
       V: () => 'Valkyrie\nValue: 18',
       W: () => 'Warden\nValue: 19',
-      T: () => 'Titan\nValue: 20'
+      T: () => 'Titan\nValue: 20',
+      π: () => 'Pi\nValue: 3.141592653',
+      ∞: () => 'Infinity\nValue: Infinity',
+      Ω: () => 'Omega\nValue: 0.567143290409783872999968662210',
+      ‡: () => 'Editors Mark\nValue: NAN',
+      Z1: () => 'Z variable\nValue: Z',
+       Y1: () => 'Y variable\nValue: Y',
+      X1: () => 'X variable\nValue: X'
     };
 
  function scatterCards() {
@@ -163,6 +172,22 @@
       });
     }
 
+ function zoomGame(scale) {
+      document.documentElement.style.setProperty('--zoom', scale);
+    }
+
+    function toggleUI() {
+      const ui = document.getElementById('ui-controls');
+      const btn = document.getElementById('hide-ui-toggle');
+      if (ui.style.display === 'none') {
+        ui.style.display = 'flex';
+        btn.textContent = 'Hide UI';
+      } else {
+        ui.style.display = 'none';
+        btn.textContent = 'Show UI';
+      }
+    }
+    
 function createCard(value, suit) {
       const card = document.createElement('div');
       card.className = 'card';
@@ -269,6 +294,8 @@ function createCard(value, suit) {
       if (mode === '5suits') suits.push(extraSuits[0]);
       if (mode === '6suits') suits.push(...extraSuits);
       if (mode === 'extraRanks') values.push(...extraValues);
+ if (mode === 'chaos') suits.push(...chaoticSuits);
+      if (mode === 'chaos') values.push(...chaoticRanks);
 
       let deck = [];
       for (let suit of suits) {
