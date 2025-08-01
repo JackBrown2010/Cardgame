@@ -203,6 +203,10 @@ function zoomGame(scale) {
 
     window.onload = () => {
   zoomGame(document.getElementById('zoom-control').value);
+      const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom')) || 1;
+card.style.left = (x * zoom) + "px";
+card.style.top = (y * zoom) + "px";
+
 };
 
 
