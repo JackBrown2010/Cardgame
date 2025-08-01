@@ -92,6 +92,8 @@
 </head>
 <body>
   <div id="game-container"></div>
+  <button id="hide-ui-toggle" onclick="toggleUI()">Hide UI</button>
+  <input id="zoom-control" type="range" min="0.5" max="2" step="0.1" value="1" oninput="zoomGame(this.value)" />
   <div class="controls">
     <select id="deck-mode">
       <option value="normal">Normal Deck</option>
@@ -122,7 +124,7 @@
     let flipMode = false;
     let tooltip;
  const chaoticSuits = ['★', '☘', '☂', '☠', '★', '✿'];
-    const chaoticRanks = ['0', '-1', 'π', '∞', 'Ω', '‡', '1000', 'Z1', 'X1', 'Y1'];
+    const chaoticRanks = ['0', '-1', 'π', 'Inf', 'Ω', '‡', '1000', 'Z1', 'X1', 'Y1'];
     const baseSuits = ['♠', '♥', '♦', '♣'];
     const extraSuits = ['★', '✿'];
     const baseValues = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
@@ -146,7 +148,7 @@
       W: () => 'Warden\nValue: 19',
       T: () => 'Titan\nValue: 20',
       π: () => 'Pi\nValue: 3.141592653',
-      ∞: () => 'Infinity\nValue: Infinity',
+      Inf: () => 'Infinity\nValue: Infinity',
       Ω: () => 'Omega\nValue: 0.567143290409783872999968662210',
       ‡: () => 'Editors Mark\nValue: NAN',
       Z1: () => 'Z variable\nValue: Z',
@@ -172,6 +174,22 @@
       });
     }
 
+function zoomGame(scale) {
+      document.documentElement.style.setProperty('--zoom', scale);
+    }
+
+    function toggleUI() {
+      const ui = document.getElementById('ui-controls');
+      const btn = document.getElementById('hide-ui-toggle');
+      if (ui.style.display === 'none') {
+        ui.style.display = 'flex';
+        btn.textContent = 'Hide UI';
+      } else {
+        ui.style.display = 'none';
+        btn.textContent = 'Show UI';
+      }
+    }
+    
 function createCard(value, suit) {
       const card = document.createElement('div');
       card.className = 'card';
