@@ -216,15 +216,24 @@ function zoomGame(scale) {
     };
 
 
-    function toggleUI() {
-      const ui = document.getElementById('ui-controls');
-      const zoom = document.getElementById('zoom-control');
-      const btn = document.getElementById('hide-ui-toggle');
-      const isHidden = ui.style.display === 'none';
-      ui.style.display = isHidden ? 'flex' : 'none';
-      zoom.style.display = isHidden ? 'block' : 'none';
-      btn.textContent = isHidden ? 'Hide UI' : 'Show UI';
+    let uiHidden = false;
+
+  function toggleUI() {
+    uiHidden = !uiHidden;
+
+    const uiElements = [
+      document.getElementById('ui-controls'),
+      document.getElementById('zoom-control'),
+      ...document.querySelectorAll('.tooltip')
+    ];
+
+    for (const el of uiElements) {
+      if (el) el.style.display = uiHidden ? 'none' : '';
     }
+
+    const btn = document.getElementById('hide-ui-toggle');
+    btn.textContent = uiHidden ? 'Show UI' : 'Hide UI';
+  }
 
     
 function createCard(value, suit) {
