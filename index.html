@@ -105,6 +105,8 @@
     <button onclick="reshuffle()">Reshuffle</button>
     <button onclick="reset()">Reset</button>
     <button onclick="toggleFlipMode()" id="flip-toggle">Flip: Off</button>
+     <button onclick="scatterCards()">Scatter</button>
+    <button onclick="flipAll()">Flip All</button>
   </div>
   <script>
     const gameContainer = document.getElementById("game-container");
@@ -136,6 +138,24 @@
       T: () => 'Titan\nValue: 20'
     };
 
+ function scatterCards() {
+      cards.forEach((card, i) => {
+        card.style.left = `${Math.random() * (window.innerWidth - 80)}px`;
+        card.style.top = `${Math.random() * (window.innerHeight - 120)}px`;
+      });
+    }
+
+    function flipAll() {
+      cards.forEach(card => {
+        card.classList.add("flipped");
+        if (card.dataset.suit === '♥' || card.dataset.suit === '♦') {
+          card.classList.add("red");
+        } else {
+          card.classList.remove("red");
+        }
+      });
+    }
+    
     function toggleFlipMode() {
       flipMode = !flipMode;
       document.getElementById("flip-toggle").textContent = "Flip: " + (flipMode ? "On" : "Off");
