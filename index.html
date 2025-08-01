@@ -23,6 +23,7 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
+      transform-origin: top left;
     }
     .card, .chip {
       width: 18vw;
@@ -198,22 +199,21 @@
     }
 
 function zoomGame(scale) {
-  document.documentElement.style.setProperty('--zoom', scale);
-}
+      const container = document.getElementById('game-container');
+      container.style.transform = `scale(${scale})`;
+      container.style.width = `${window.innerWidth / scale}px`;
+      container.style.height = `${window.innerHeight / scale}px`;
+    }
+
 
   window.onload = () => {
   zoomGame(document.getElementById('zoom-control').value);
-
-  const zoom = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--zoom')) || 1;
-
-  cards.forEach(card => {
-    const x = parseFloat(card.style.left) || 0;
-    const y = parseFloat(card.style.top) || 0;
-    card.style.left = (x * zoom) + "px";
-    card.style.top = (y * zoom) + "px";
-  });
 };
 
+
+    window.onresize = () => {
+      zoomGame(document.getElementById('zoom-control').value);
+    };
 
 
     function toggleUI() {
