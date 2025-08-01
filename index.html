@@ -23,7 +23,6 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      transform-origin: top left;
     }
     .card, .chip {
       width: 18vw;
@@ -200,8 +199,6 @@
 
 function zoomGame(scale) {
   document.documentElement.style.setProperty('--zoom', scale);
-  const container = document.getElementById('game-container');
-  container.style.transform = `scale(${scale})`;
 }
 
     window.onload = () => {
