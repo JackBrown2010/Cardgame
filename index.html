@@ -219,23 +219,27 @@ function zoomGame(scale) {
     let uiHidden = false;
 
 function toggleUI() {
-  const ui = document.getElementById('ui-controls');
-  const zoom = document.getElementById('zoom-control');
-  const btn = document.getElementById('hide-ui-toggle');
   uiHidden = !uiHidden;
 
-  if (uiHidden) {
-    ui.style.visibility = 'hidden';
-    ui.style.pointerEvents = 'none';
-    zoom.style.display = 'none';
-    btn.textContent = 'Show UI';
-  } else {
-    ui.style.visibility = 'visible';
-    ui.style.pointerEvents = 'auto';
-    zoom.style.display = 'block';
-    btn.textContent = 'Hide UI';
+  // List of all UI element IDs and classes to hide/show
+  const elementsToToggle = [
+    document.getElementById('controls'),
+    document.getElementById('zoom-control'),
+  ];
+
+  elementsToToggle.forEach(el => {
+    if (el) {
+      el.style.display = uiHidden ? 'none' : '';
+    }
+  });
+
+  // Update the toggle button's label (only if it stays visible)
+  if (!uiHidden) {
+    const btn = document.getElementById('hide-ui-toggle');
+    if (btn) btn.textContent = 'Hide UI';
   }
 }
+
 
     
 function createCard(value, suit) {
